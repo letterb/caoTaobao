@@ -3,6 +3,7 @@ package io.github.gtf.caotaobao;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -67,7 +68,9 @@ implements NavigationView.OnNavigationItemSelectedListener
 
 	String mUA ="User-Agent: MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
-    @Override
+	private String mLastUrl;
+
+	@Override
     protected void onCreate(Bundle savedInstanceState)
 	{
         super.onCreate(savedInstanceState);
@@ -145,7 +148,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 			}  
 		};  
     }
-
+	int mDoubleClick2Exit = 0;
     @Override
     public void onBackPressed()
 	{
@@ -156,18 +159,53 @@ implements NavigationView.OnNavigationItemSelectedListener
         }
 		else
 		{
-			if (mWebView.canGoBack())
-			{
-				mWebView.goBack();
+			boolean want2Exit = false;
+			do {
+				String currentUrl = mWebView.getUrl();
+				int sharp = currentUrl.indexOf('#');
+				if (sharp != -1) {
+					currentUrl = currentUrl.substring(0, sharp);
+				}
+				String lastUrl = mLastUrl;
+				sharp = lastUrl.indexOf('#');
+				if (sharp != -1) {
+					lastUrl = lastUrl.substring(0, sharp);
+				}
+				if (TextUtils.equals(currentUrl, lastUrl)) {
+					want2Exit = true;
+					break;
+				}
+				if (mWebView.canGoBack()) {
+					mWebView.goBack();
+				} else {
+					want2Exit = true;
+					break;
+				}
+			}while (false);
+			if( want2Exit ) {
+				if (++mDoubleClick2Exit == 2) {
+					super.onBackPressed();
+				} else {
+					Toast.makeText(this, "再按一次返回关闭", Toast.LENGTH_SHORT).show();
+					mWebView.postDelayed(mExitingRunnable, 1000);
+				}
 			}
-			else
-			{
-				showSnackBar("退出？", "确定", 1);
-			}
-        }
+//			Toast.makeText(this, mWebView.getUrl(), Toast.LENGTH_LONG).show();
+		}
     }
+	Runnable mExitingRunnable = new Runnable() {
+		@Override
+		public void run() {
+			mDoubleClick2Exit = 0;
+		}
+	};
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mDoubleClick2Exit = 0;
+	}
 
-    @Override
+	@Override
     public boolean onCreateOptionsMenu(Menu menu)
 	{
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -186,7 +224,7 @@ implements NavigationView.OnNavigationItemSelectedListener
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_home)
 		{
-			mWebView.loadUrl(mTaobaoUrl);
+			loadUrl(mTaobaoUrl);
             return true;
         }
 		else if (id == R.id.action_exit)
@@ -224,11 +262,11 @@ implements NavigationView.OnNavigationItemSelectedListener
 			IsAtHome = true;
 			if (IsTaobaoLite == false)
 			{
-				mWebView.loadUrl(mTaobaoUrl);
+				loadUrl(mTaobaoUrl);
 			}
 			else
 			{
-				mWebView.loadUrl(mTaobaoLiteUrl);
+				loadUrl(mTaobaoLiteUrl);
 			}
 		}
 
@@ -246,7 +284,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 		{
             if (IsTaobaoLite == false)
 			{
-				mWebView.loadUrl(mMyTaobaoUrl);
+				loadUrl(mMyTaobaoUrl);
 			}
 			else
 			{
@@ -257,50 +295,50 @@ implements NavigationView.OnNavigationItemSelectedListener
 		{
 			if (IsTaobaoLite == false)
 			{
-				mWebView.loadUrl(mTaobaoGouwuche);
+				loadUrl(mTaobaoGouwuche);
 			}
 			else
 			{
-				mWebView.loadUrl(mTaobaoLiteGouwuche);
+				loadUrl(mTaobaoLiteGouwuche);
 			}
         }
 		else if (id == R.id.nav_dingdan)
 		{
 			if (IsTaobaoLite == false)
 			{
-				mWebView.loadUrl(mTaobaoDingdan);
+				loadUrl(mTaobaoDingdan);
 			}
 			else
 			{
-				mWebView.loadUrl(mTaobaoLiteWodedingdan);
+				loadUrl(mTaobaoLiteWodedingdan);
 			}
         }
 		else if (id == R.id.nav_kajuanbao)
 		{
-			mWebView.loadUrl(mTaobaoKajuanbao);
+			loadUrl(mTaobaoKajuanbao);
         }
 		else if (id == R.id.nav_soucangjia)
 		{
 			if (IsTaobaoLite == false)
 			{
-				mWebView.loadUrl(mTaobaoSoucangjia);
+				loadUrl(mTaobaoSoucangjia);
 			}
 			else
 			{
-				mWebView.loadUrl(mTaobaoLiteSoucangjia);
+				loadUrl(mTaobaoLiteSoucangjia);
 			}
         }
 		else if (id == R.id.nav_wuliu)
 		{
-			mWebView.loadUrl(mTaobaoWuliuUrl);
+			loadUrl(mTaobaoWuliuUrl);
         }
 		else if (id == R.id.nav_zuji)
 		{
-			mWebView.loadUrl(mTaobaoZuji);
+			loadUrl(mTaobaoZuji);
 		}
 		else if (id == R.id.nav_wangwang)
 		{
-			mWebView.loadUrl(mTaobaoWW);
+			loadUrl(mTaobaoWW);
 		}
 		else if (id == R.id.nav_mTabaoTypeChange)
 		{
@@ -316,7 +354,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 //完成提交
 				editor.commit();
 				IsAtHome = true;
-				mWebView.loadUrl(mTaobaoLiteUrl);
+				loadUrl(mTaobaoLiteUrl);
 			}
 			else
 			{
@@ -330,7 +368,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 //完成提交
 				editor.commit();
 				IsAtHome = true;
-				mWebView.loadUrl(mTaobaoUrl);
+				loadUrl(mTaobaoUrl);
 
 			}
 		}
@@ -354,13 +392,19 @@ implements NavigationView.OnNavigationItemSelectedListener
 			startActivity(Intent.createChooser(intent, "请选择浏览器"));
 
 		}
-		
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
 
     }
+
+	private void loadUrl(String url) {
+    	mLastUrl = url;
+		mWebView.loadUrl(url);
+		mDoubleClick2Exit = 0;
+	}
 
 	public void exitProgrames()
 	{
@@ -399,11 +443,11 @@ implements NavigationView.OnNavigationItemSelectedListener
 		//mWebViewSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 		if (IsTaobaoLite == false)
 		{
-			mWebView.loadUrl(mTaobaoUrl);
+			loadUrl(mTaobaoUrl);
 		}
 		else
 		{
-			mWebView.loadUrl(mTaobaoLiteUrl);
+			loadUrl(mTaobaoLiteUrl);
 		}
 		mWebView.setWebChromeClient(new WebChromeClient(){
 				@Override
@@ -441,7 +485,15 @@ implements NavigationView.OnNavigationItemSelectedListener
 							}, 1000);
 					}
 				}
-			});
+
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+					if( url != null && url.startsWith("intent://") ){
+						return true;
+					}
+				return super.shouldOverrideUrlLoading(view, url);
+			}
+		});
 	}
 	/**
      * 展示一个SnackBar
@@ -467,7 +519,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 					}
 					else if (action_number == 2)
 					{
-						mWebView.loadUrl(mTaobaoLiteDengluUrl);
+						loadUrl(mTaobaoLiteDengluUrl);
 					}
 				}
 			}).show();
@@ -693,7 +745,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 				public void onClick(DialogInterface dialog, int which)
 				{
 					copy("", Main.this);
-					mWebView.loadUrl(getTaoKeyUrl(originalClipboard));
+					loadUrl(getTaoKeyUrl(originalClipboard));
 				}
 			});
 		Dialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -716,7 +768,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 
 		}
 	}
-	
+
 	void noticeDialog(){
 		//提示dialog
 		Dialog.setCancelable(false);
@@ -730,7 +782,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 			});
 		Dialog.show();
 	}
-	
+
 	void changeDialog(){
 		Dialog.setCancelable(false);
 		Dialog.setTitle("特大喜讯：");
@@ -746,7 +798,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 				}
 			});
 		Dialog.show();
-		
+
 	}
 
 	@Override
@@ -776,5 +828,5 @@ implements NavigationView.OnNavigationItemSelectedListener
 			        return this.getString(R.string.can_not_find_version_name);
 			     }
 		 }*/
-	
+
 }
