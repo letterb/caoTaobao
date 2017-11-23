@@ -7,10 +7,10 @@
         android:title="主页"
         app:showAsAction="never" />
 	<item
-        android:id="@+id/action_reload"
-        android:orderInCategory="100"
-        android:title="刷新"
-        app:showAsAction="never" />
+		android:id="@+id/action_reload"
+		android:orderInCategory="100"
+		android:title="刷新"
+		app:showAsAction="ifRoom" />
 	<item
         android:id="@+id/action_exit"
         android:orderInCategory="100"
@@ -22,8 +22,13 @@
         android:title="分享"
         app:showAsAction="never" />
 	<item
+		android:id="@+id/reload"
+		android:title="刷新"
+		android:icon="@mipmap/reload_48dp"
+		app:showAsAction="ifRoom" />
+	<item
         android:id="@+id/home"
-		app:srcCompat="@mipmap/home" 
+		android:icon="@mipmap/home_48dp"
         android:title="主页"
         app:showAsAction="ifRoom" />
 </menu>

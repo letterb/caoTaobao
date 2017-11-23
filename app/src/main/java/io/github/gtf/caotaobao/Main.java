@@ -251,7 +251,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 			Dialog.show();
 			return true;
 		}	
-		else if (id == R.id.action_reload)
+		else if (id == R.id.action_reload || id == R.id.reload )
 		{
 			showSnackBar("刷新ing........", " ", 0);
 			mWebView.reload();
@@ -501,18 +501,18 @@ implements NavigationView.OnNavigationItemSelectedListener
     public void showSnackBar(String message, String button_text, final int action_number)
 	{
         //去掉虚拟按键
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-														 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
-														 | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
-														 );
-        final Snackbar snackbar = Snackbar.make(getWindow().getDecorView(), message, Snackbar.LENGTH_LONG);
+//        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//														 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION //隐藏虚拟按键栏
+//														 | View.SYSTEM_UI_FLAG_IMMERSIVE //防止点击屏幕时,隐藏虚拟按键栏又弹了出来
+//														 );
+        final Snackbar snackbar = Snackbar.make(this.mWebView, message, Snackbar.LENGTH_LONG);
         snackbar.setAction(button_text, new View.OnClickListener() {
 				@Override
 				public void onClick(View v)
 				{
 					snackbar.dismiss();
 					//隐藏SnackBar时记得恢复隐藏虚拟按键栏,不然屏幕底部会多出一块空白布局出来,和难看
-					getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+//					getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 					if (action_number == 1)
 					{
 						exitProgrames();
