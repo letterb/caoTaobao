@@ -12,6 +12,11 @@
 		android:title="刷新"
 		app:showAsAction="ifRoom" />
 	<item
+		android:id="@+id/action_clean_cache"
+		android:orderInCategory="100"
+		android:title="清理缓存"
+		app:showAsAction="ifRoom" />
+	<item
         android:id="@+id/action_exit"
         android:orderInCategory="100"
         android:title="退出"

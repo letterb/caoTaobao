@@ -216,6 +216,8 @@ implements NavigationView.OnNavigationItemSelectedListener
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
 	{
+		if( mWebView == null  )
+			return super.onOptionsItemSelected(item);;
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -268,6 +270,9 @@ implements NavigationView.OnNavigationItemSelectedListener
 			{
 				loadUrl(mTaobaoLiteUrl);
 			}
+		}else if( id == R.id.action_clean_cache ){
+        	mWebView.clearCache(true);
+        	showSnackBar("清理缓存中...", "", 0);
 		}
 
         return super.onOptionsItemSelected(item);
@@ -435,7 +440,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 		mWebViewSettings.setLoadsImagesAutomatically(true); //支持自动加载图片
 		mWebViewSettings.setDefaultTextEncodingName("utf-8");//设置编码格式
 		//优先使用缓存: 
-		mWebViewSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK); 
+		mWebViewSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		mWebViewSettings.setAppCacheEnabled(true);
 		mWebViewSettings.setDatabaseEnabled(true);
 		mWebViewSettings.setDomStorageEnabled(true);//开启DOM缓存
@@ -491,6 +496,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 					if( url != null && url.startsWith("intent://") ){
 						return true;
 					}
+				view.loadUrl(url);
 				return super.shouldOverrideUrlLoading(view, url);
 			}
 		});
