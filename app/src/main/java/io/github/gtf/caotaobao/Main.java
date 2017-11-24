@@ -1,35 +1,46 @@
 package io.github.gtf.caotaobao;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.text.TextUtils;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.*;
-import java.net.*;
-import android.app.*;
-import android.graphics.*;
-import android.view.*;
-import android.content.*;
-import android.os.*;
-import android.widget.*;
-import java.util.*;
-import android.renderscript.*;
-import android.net.*;
-import android.content.pm.*;
+import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class Main extends AppCompatActivity
 implements NavigationView.OnNavigationItemSelectedListener
 {
+	private static final String KEY_TITLE = "KEY_TITLE";
 	WebView mWebView;
 	Toolbar toolbar;
 	FloatingActionButton fab;
@@ -69,6 +80,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 	String mUA ="User-Agent: MQQBrowser/26 Mozilla/5.0 (Linux; U; Android 2.3.7; zh-cn; MB200 Build/GRJ22; CyanogenMod-7) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
 	private String mLastUrl;
+	private String mCustomTitle;
 
 	@Override
     protected void onCreate(Bundle savedInstanceState)
@@ -146,8 +158,32 @@ implements NavigationView.OnNavigationItemSelectedListener
 					mWebView.setVisibility(View.VISIBLE);
 				}  
 			}  
-		};  
+		};
+		mCustomTitle = getSharedPreferences("data", 0).getString(KEY_TITLE, "");
     }
+
+    private void showEditDialog(){
+		final EditText et = new EditText(this);
+		et.setText(mCustomTitle);
+
+		new AlertDialog.Builder(this).setTitle("设置标题")
+				.setIcon(android.R.drawable.ic_dialog_info)
+				.setView(et)
+				.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						String input = et.getText().toString();
+						if (DialogInterface.BUTTON_POSITIVE == which) {
+							Toast.makeText(Main.this, "成功设置标题为 "+ input, Toast.LENGTH_LONG).show();
+							getSharedPreferences("data", 0).edit().putString(KEY_TITLE, input).apply();
+							mCustomTitle = input;
+							updateTitle(input);
+						}
+					}
+				})
+				.setNegativeButton("取消", null)
+				.show();
+	}
+
 	int mDoubleClick2Exit = 0;
     @Override
     public void onBackPressed()
@@ -272,7 +308,10 @@ implements NavigationView.OnNavigationItemSelectedListener
 			}
 		}else if( id == R.id.action_clean_cache ){
         	mWebView.clearCache(true);
+			mWebView.reload();
         	showSnackBar("清理缓存中...", "", 0);
+		}else if( id == R.id.title ){
+			showEditDialog();
 		}
 
         return super.onOptionsItemSelected(item);
@@ -458,8 +497,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 				@Override
 				public void onReceivedTitle(WebView view, String title)
 				{
-					toolbarTitle = title;
-					toolbar.setTitle(toolbarTitle);
+					updateTitle(title);
 				}
 			});
 		//复写WebViewClient类的shouldOverrideUrlLoading方法
@@ -477,7 +515,7 @@ implements NavigationView.OnNavigationItemSelectedListener
 				{
 					super.onPageFinished(view, url);
 					mProgressDialog.hide();
-					toolbar.setTitle(toolbarTitle);
+					updateTitle(toolbarTitle);
 					IshaveTaoKey();
 					if (HideLogo)
 					{
@@ -501,6 +539,15 @@ implements NavigationView.OnNavigationItemSelectedListener
 			}
 		});
 	}
+
+	private void updateTitle(String title) {
+		toolbarTitle = title;
+		if( !TextUtils.isEmpty(mCustomTitle) && (TextUtils.equals(title, "淘宝网触屏版") || TextUtils.equals(title, "淘宝网 全球站") ) ){
+            toolbar.setTitle(mCustomTitle);
+        }else
+            toolbar.setTitle(toolbarTitle);
+	}
+
 	/**
      * 展示一个SnackBar
      */
